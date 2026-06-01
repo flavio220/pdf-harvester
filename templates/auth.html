@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Harvester — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+// Appliquer le thème sauvegardé avant le rendu (évite le flash)
+(function(){
+  var t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#4fffb0;--accent2:#7b61ff;--accent3:#ff6b6b;--gold:#f5c842;
+  --r:14px;--t:.22s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#06080d;--surface:#0d1117;--surface2:#141920;
+  --border:#1a2030;--text:#e2e8f4;--muted:#506080;
+}
+[data-theme="light"]{
+  --bg:#f0f4fb;--surface:#ffffff;--surface2:#eaeff8;
+  --border:#cfd8ec;--text:#18202e;--muted:#7a8aaa;
+}
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  transition:background var(--t),color var(--t);
+}
+[data-theme="light"] .hero{background:linear-gradient(160deg,#dde8f8 0%,#eaf1fb 60%,#e4eef8 100%);}
+[data-theme="light"] .hero-logo-name{color:#1a7a55;}
+[data-theme="light"] .hero-headline em{color:#1a7a55;}
+[data-theme="light"] .hero-stat .val{color:#1a7a55;}
+[data-theme="light"] .feat-dot{background:#1a7a55;}
+/* Theme toggle sur la page auth */
+.auth-theme-btn{
+  position:fixed;top:18px;right:18px;z-index:200;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:all var(--t);
+}
+.auth-theme-btn:hover{background:var(--surface);}
+
+/* ── LEFT HERO ── */
+.hero{
+  background:linear-gradient(160deg,#060b14 0%,#0d1825 60%,#0a1520 100%);
+  padding:60px 56px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  position:relative;
+  overflow:hidden;
+  border-right:1px solid var(--border);
+}
+.hero::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(79,255,176,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(79,255,176,.03) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.hero-orb{
+  position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;
+}
+.hero-orb-1{width:400px;height:400px;background:rgba(79,255,176,.07);top:-100px;left:-80px;}
+.hero-orb-2{width:300px;height:300px;background:rgba(123,97,255,.06);bottom:-60px;right:-40px;}
+
+.hero-top{position:relative;z-index:1;}
+.hero-logo{display:flex;align-items:center;gap:12px;}
+.hero-logo-icon{font-size:32px;}
+.hero-logo-name{
+  font-family:'Playfair Display',serif;
+  font-size:22px;font-weight:800;
+  color:var(--accent);
+}
+.hero-logo-tag{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:2px;margin-top:2px;}
+
+.hero-main{position:relative;z-index:1;}
+.hero-headline{
+  font-family:'Playfair Display',serif;
+  font-size:48px;font-weight:800;
+  line-height:1.1;letter-spacing:-.5px;
+  margin-bottom:20px;
+}
+.hero-headline em{color:var(--accent);font-style:italic;}
+.hero-desc{font-size:15px;color:var(--muted);line-height:1.7;max-width:360px;}
+
+.hero-stats{
+  display:flex;gap:32px;
+  position:relative;z-index:1;
+}
+.hero-stat .val{
+  font-family:'DM Mono',monospace;
+  font-size:26px;font-weight:500;
+  color:var(--accent);
+}
+.hero-stat .lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+
+.hero-features{
+  display:flex;flex-direction:column;gap:12px;
+  position:relative;z-index:1;
+  margin-top:32px;
+}
+.hero-feat{
+  display:flex;align-items:center;gap:12px;
+  font-size:13px;color:var(--muted);
+}
+.feat-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);flex-shrink:0;
+}
+
+/* ── RIGHT FORM ── */
+.auth-side{
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  padding:48px 56px;
+}
+.auth-box{width:100%;max-width:400px;}
+
+.auth-tabs{
+  display:flex;gap:4px;
+  background:var(--surface2);
+  border-radius:12px;padding:4px;
+  margin-bottom:36px;
+}
+.auth-tab{
+  flex:1;padding:11px;
+  border:none;background:transparent;
+  border-radius:9px;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;
+  color:var(--muted);cursor:pointer;
+  transition:all var(--t);
+}
+.auth-tab.active{
+  background:var(--bg);
+  color:var(--text);
+  box-shadow:0 2px 10px rgba(0,0,0,.4);
+}
+
+.auth-form-title{
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:800;
+  margin-bottom:6px;
+}
+.auth-form-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+.auth-form-sub a{color:var(--accent);text-decoration:none;}
+
+.form-group{margin-bottom:18px;}
+.form-label{
+  display:block;font-size:11px;font-weight:600;
+  color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:8px;
+}
+.form-input{
+  width:100%;padding:13px 16px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:14px;
+  outline:none;transition:all var(--t);
+}
+.form-input:focus{
+  border-color:rgba(79,255,176,.4);
+  box-shadow:0 0 0 3px rgba(79,255,176,.07);
+}
+.form-input::placeholder{color:var(--muted);}
+
+.ref-notice{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  background:rgba(79,255,176,.06);
+  border:1px solid rgba(79,255,176,.15);
+  border-radius:8px;
+  font-size:12px;color:var(--accent);
+  margin-bottom:18px;
+}
+
+.btn-submit{
+  width:100%;padding:15px;
+  background:var(--accent);color:#000;
+  border:none;border-radius:11px;
+  font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all var(--t);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-submit:hover{background:#2de896;transform:translateY(-1px);box-shadow:0 6px 24px rgba(79,255,176,.25);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.auth-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:20px 0;color:var(--muted);font-size:11px;
+}
+.auth-divider::before,.auth-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+.auth-error{
+  margin-top:14px;padding:11px 15px;
+  background:rgba(255,107,107,.08);
+  border:1px solid rgba(255,107,107,.2);
+  border-radius:8px;font-size:12px;color:var(--accent3);
+  display:none;
+}
+
+.avatar-picker{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;
+}
+.color-swatch{
+  width:28px;height:28px;border-radius:50%;
+  cursor:pointer;transition:all var(--t);
+  border:2px solid transparent;
+  flex-shrink:0;
+}
+.color-swatch.active,.color-swatch:hover{
+  transform:scale(1.2);
+  border-color:var(--text);
+}
+
+.spinner{
+  width:16px;height:16px;border:2px solid rgba(0,0,0,.2);
+  border-top-color:#000;border-radius:50%;
+  animation:spin .7s linear infinite;display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:900px){
+  body{grid-template-columns:1fr;}
+  .hero{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- Bouton thème -->
+<div class="auth-theme-btn" id="theme-btn" onclick="toggleTheme()" title="Changer de thème">🌙</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+
+  <div class="hero-top">
+    <div class="hero-logo">
+      <div class="hero-logo-icon">📄</div>
+      <div>
+        <div class="hero-logo-name">PDF Harvester</div>
+        <div class="hero-logo-tag">OPEN KNOWLEDGE PLATFORM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-main">
+    <h1 class="hero-headline">Le savoir,<br><em>librement</em><br>accessible.</h1>
+    <p class="hero-desc">
+      Recherchez et téléchargez des milliers de PDFs open access depuis 8 bases de données académiques et officielles.
+    </p>
+    <div class="hero-features">
+      <div class="hero-feat"><div class="feat-dot"></div>arXiv, PubMed, Gutenberg, CrossRef et plus</div>
+      <div class="hero-feat"><div class="feat-dot"></div>Invitez des amis et obtenez des téléchargements bonus</div>
+      <div class="hero-feat"><div class="feat-dot"></div>Mode sombre / clair, dashboard personnalisé</div>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="val">8</div>
+      <div class="lbl">Sources</div>
+    </div>
+    <div class="hero-stat">
+      <div class="val">∞</div>
+      <div class="lbl">Documents</div>
+    </div>
+    <div class="hero-stat">
+      <div class="val">100%</div>
+      <div class="lbl">Légal</div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH FORM -->
+<div class="auth-side">
+  <div class="auth-box">
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Connexion</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Inscription</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <h2 class="auth-form-title">Bon retour 👋</h2>
+      <p class="auth-form-sub">Pas encore de compte ? <a href="#" onclick="switchTab('register')">Inscrivez-vous</a></p>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="l-email" class="form-input" placeholder="vous@domaine.fr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" id="l-pwd" class="form-input" placeholder="••••••••">
+        <div style="text-align:right;margin-top:6px">
+          <a href="#" onclick="switchTab('forgot')" style="font-size:11px;color:var(--muted);text-decoration:none;">Mot de passe oublié ?</a>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btn-login" onclick="doLogin()">
+        <span id="login-label">Se connecter</span>
+        <div class="spinner" id="login-spin"></div>
+      </button>
+      <div class="auth-error" id="login-err"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-register" style="display:none">
+      <h2 class="auth-form-title">Créer un compte</h2>
+      <p class="auth-form-sub">Déjà inscrit ? <a href="#" onclick="switchTab('login')">Connectez-vous</a></p>
+
+      <div id="ref-banner" style="display:none" class="ref-notice">
+        🎁 Vous avez été invité(e) — vous recevrez des bonus au démarrage !
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Prénom & nom</label>
+        <input type="text" id="r-name" class="form-input" placeholder="Jean Dupont">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="r-email" class="form-input" placeholder="vous@domaine.fr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" id="r-pwd" class="form-input" placeholder="6 caractères minimum">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Couleur d'avatar</label>
+        <div class="avatar-picker" id="color-picker"></div>
+      </div>
+
+      <button class="btn-submit" id="btn-register" onclick="doRegister()">
+        <span id="reg-label">Créer mon compte</span>
+        <div class="spinner" id="reg-spin"></div>
+      </button>
+      <div class="auth-error" id="register-err"></div>
+    </div>
+    <!-- FORGOT PASSWORD -->
+    <div id="form-forgot" style="display:none">
+      <h2 class="auth-form-title">🔑 Mot de passe oublié</h2>
+      <p class="auth-form-sub">Entre ton email pour recevoir un lien de réinitialisation. <a href="#" onclick="switchTab('login')">Retour</a></p>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="f-email" class="form-input" placeholder="vous@domaine.fr">
+      </div>
+      <button class="btn-submit" id="btn-forgot" onclick="doForgot()">
+        <span id="forgot-label">Envoyer le lien</span>
+        <div class="spinner" id="forgot-spin"></div>
+      </button>
+      <div class="auth-error" id="forgot-err"></div>
+      <div id="forgot-ok" style="display:none;margin-top:14px;padding:11px 15px;background:rgba(79,255,176,.08);border:1px solid rgba(79,255,176,.2);border-radius:8px;font-size:12px;color:var(--accent)"></div>
+
+
+  </div>
+</div>
+
+<script>
+const COLORS = ['#4fffb0','#7b61ff','#ff6b6b','#f5c842','#60bfff','#ff9f7e','#c084fc','#34d399'];
+let selectedColor = COLORS[0];
+
+// Init color picker
+const picker = document.getElementById('color-picker');
+COLORS.forEach(c => {
+  const sw = document.createElement('div');
+  sw.className = 'color-swatch' + (c === selectedColor ? ' active' : '');
+  sw.style.background = c;
+  sw.onclick = () => {
+    document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
+    sw.classList.add('active');
+    selectedColor = c;
+  };
+  picker.appendChild(sw);
+});
+
+// Check URL params (Flask-injected + URL params)
+const urlParams = new URLSearchParams(window.location.search);
+const refCode = '{{ ref_code }}' || urlParams.get('ref') || '';
+const initTab  = '{{ tab }}' || urlParams.get('tab') || 'login';
+const initQ    = '{{ q }}' || urlParams.get('q') || '';
+
+if (refCode) {
+  document.getElementById('ref-banner').style.display = 'flex';
+}
+if (initTab === 'register') switchTab('register');
+if (initQ) sessionStorage.setItem('pending_search', initQ);
+
+// Thème
+let theme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+document.getElementById('theme-btn').textContent = theme === 'dark' ? '🌙' : '☀️';
+
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-btn').textContent = theme === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('theme', theme);
+}
+
+function switchTab(tab) {
+  ['login','register','forgot'].forEach(t => {
+    const el = document.getElementById('form-' + t);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById('form-' + tab);
+  if (target) target.style.display = 'block';
+  const tl = document.getElementById('tab-login');
+  const tr = document.getElementById('tab-register');
+  if (tl) tl.classList.toggle('active', tab === 'login');
+  if (tr) tr.classList.toggle('active', tab === 'register');
+}
+
+function setLoading(btn, spin, label, state) {
+  document.getElementById(btn).disabled = state;
+  document.getElementById(spin).style.display = state ? 'block' : 'none';
+  document.getElementById(label).style.opacity = state ? 0 : 1;
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pwd   = document.getElementById('l-pwd').value;
+  if (!email || !pwd) return showErr('login-err','Remplissez tous les champs');
+
+  setLoading('btn-login','login-spin','login-label', true);
+  document.getElementById('login-err').style.display = 'none';
+
+  try {
+    const r = await fetch('/api/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pwd })
+    }).then(r=>r.json());
+    if (r.error) { showErr('login-err', r.error); }
+    else { window.location.href = r.redirect || '/app'; }
+  } catch(e) { showErr('login-err','Erreur de connexion au serveur'); }
+
+  setLoading('btn-login','login-spin','login-label', false);
+}
+
+async function doRegister() {
+  const name  = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pwd   = document.getElementById('r-pwd').value;
+  if (!name || !email || !pwd) return showErr('register-err','Remplissez tous les champs');
+
+  setLoading('btn-register','reg-spin','reg-label', true);
+  document.getElementById('register-err').style.display = 'none';
+
+  try {
+    const r = await fetch('/api/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password:pwd, ref_code:refCode, avatar_color:selectedColor })
+    }).then(r=>r.json());
+    if (r.error) { showErr('register-err', r.error); }
+    else { window.location.href = r.redirect || '/app'; }
+  } catch(e) { showErr('register-err','Erreur de connexion au serveur'); }
+
+  setLoading('btn-register','reg-spin','reg-label', false);
+}
+
+// Enter key
+document.getElementById('l-pwd').addEventListener('keydown', e => e.key==='Enter' && doLogin());
+document.getElementById('r-pwd').addEventListener('keydown', e => e.key==='Enter' && doRegister());
+
+async function doForgot() {
+  const email = document.getElementById('f-email').value.trim();
+  if (!email) return showErr('forgot-err', 'Entre ton email');
+  setLoading('btn-forgot','forgot-spin','forgot-label', true);
+  document.getElementById('forgot-err').style.display = 'none';
+  document.getElementById('forgot-ok').style.display = 'none';
+  try {
+    const r = await fetch('/api/forgot-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    }).then(r=>r.json());
+    const ok = document.getElementById('forgot-ok');
+    ok.textContent = r.message;
+    ok.style.display = 'block';
+  } catch(e) { showErr('forgot-err','Erreur de connexion au serveur'); }
+  setLoading('btn-forgot','forgot-spin','forgot-label', false);
+}
+</script>
+</body>
+</html>

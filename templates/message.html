@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Harvester</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#4fffb0;--accent3:#ff6b6b;--t:.22s cubic-bezier(.4,0,.2,1)}
+[data-theme="dark"]{--bg:#06080d;--surface:#0d1117;--border:#1a2030;--text:#e2e8f4;--muted:#506080}
+[data-theme="light"]{--bg:#f0f4fb;--surface:#ffffff;--border:#cfd8ec;--text:#18202e;--muted:#7a8aaa}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background var(--t),color var(--t)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:56px 48px;max-width:440px;width:100%;text-align:center}
+.icon{font-size:56px;margin-bottom:20px}
+.title{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;margin-bottom:12px}
+.msg{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:32px}
+.btn{display:inline-block;padding:13px 32px;background:var(--accent);color:#000;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none;transition:all var(--t)}
+.btn:hover{background:#2de896;transform:translateY(-1px)}
+.logo{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:32px}
+.logo-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--accent)}
+</style>
+<script>
+// Appliquer le thème sauvegardé immédiatement
+(function(){
+  var t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+</head>
+<body>
+<div class="card">
+  <div class="logo"><span>📄</span><span class="logo-name">PDF Harvester</span></div>
+  <div class="icon">{{ icon }}</div>
+  <h1 class="title">{{ title }}</h1>
+  <p class="msg">{{ message }}</p>
+  <a href="{{ link }}" class="btn">{{ link_label }}</a>
+</div>
+</body>
+</html>

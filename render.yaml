@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: pdf-harvester
+    env: python
+    region: frankfurt          # plus proche de l'Afrique de l'Ouest que Oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --workers 2 --timeout 120
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: DATABASE_PATH
+        value: /var/data/app.db
+
+    # Persistent Disk — garde la BDD SQLite entre les redémarrages
+    disk:
+      name: pdf-harvester-data
+      mountPath: /var/data
+      sizeGB: 1

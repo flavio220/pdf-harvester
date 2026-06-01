@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+<title>PDF Harvester — Le savoir, librement accessible</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#4fffb0;--accent2:#7b61ff;--accent3:#ff6b6b;--gold:#f5c842;
+  --t:.22s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#06080d;--surface:#0d1117;--surface2:#141920;--surface3:#1b2232;
+  --border:#1a2030;--text:#e2e8f4;--muted:#506080;
+}
+[data-theme="light"]{
+  --bg:#f0f4fb;--surface:#ffffff;--surface2:#eaeff8;--surface3:#dde4f0;
+  --border:#cfd8ec;--text:#18202e;--muted:#7a8aaa;
+}
+
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--t),color var(--t);}
+
+/* Grid bg */
+[data-theme="dark"] body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(79,255,176,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(79,255,176,.025) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;z-index:0;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;transition:opacity .4s;}
+.orb-1{width:600px;height:600px;background:rgba(79,255,176,.06);top:-200px;left:-150px;}
+.orb-2{width:500px;height:500px;background:rgba(123,97,255,.06);bottom:-150px;right:-150px;}
+[data-theme="light"] .orb{opacity:.3;}
+
+/* ══ NAV ══ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 48px;
+  background:rgba(6,8,13,.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:background var(--t);
+}
+[data-theme="light"] nav{background:rgba(240,244,251,.9);}
+
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{font-size:22px;}
+.nav-logo-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--accent);}
+
+.nav-right{display:flex;align-items:center;gap:12px;}
+
+.nav-theme{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:all var(--t);
+}
+.nav-theme:hover{background:var(--surface3);}
+
+.btn-nav-ghost{
+  padding:9px 18px;border-radius:9px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all var(--t);text-decoration:none;
+}
+.btn-nav-ghost:hover{color:var(--text);border-color:var(--muted);}
+
+.btn-nav-primary{
+  padding:9px 20px;border-radius:9px;
+  background:var(--accent);border:none;
+  color:#000;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all var(--t);text-decoration:none;
+}
+.btn-nav-primary:hover{background:#2de896;transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,255,176,.25);}
+
+/* ══ HERO ══ */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:120px 48px 80px;
+  position:relative;z-index:1;
+  text-align:center;
+}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;border-radius:20px;
+  background:rgba(79,255,176,.08);border:1px solid rgba(79,255,176,.18);
+  font-size:11px;font-weight:700;color:var(--accent);
+  font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:28px;
+  animation:fadeDown .6s ease both;
+}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+.hero-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(48px,7vw,88px);
+  font-weight:800;line-height:1.05;
+  letter-spacing:-2px;
+  max-width:900px;
+  margin-bottom:24px;
+  animation:fadeUp .7s ease .1s both;
+}
+.hero-title em{color:var(--accent);font-style:italic;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.hero-sub{
+  font-size:18px;color:var(--muted);max-width:560px;line-height:1.7;
+  margin-bottom:48px;
+  animation:fadeUp .7s ease .2s both;
+}
+
+/* ══ SEARCH BOX (landing) ══ */
+.hero-search{
+  width:100%;max-width:680px;
+  animation:fadeUp .7s ease .3s both;
+  margin-bottom:48px;
+}
+
+.hsbox{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:8px 8px 8px 20px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 48px rgba(0,0,0,.3);
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.hsbox:focus-within{
+  border-color:rgba(79,255,176,.3);
+  box-shadow:0 8px 48px rgba(0,0,0,.3), 0 0 0 4px rgba(79,255,176,.06);
+}
+
+.hs-icon{font-size:20px;color:var(--muted);flex-shrink:0;}
+.hsinput{
+  flex:1;background:transparent;border:none;
+  color:var(--text);font-family:'Outfit',sans-serif;font-size:16px;
+  outline:none;padding:8px 0;
+}
+.hsinput::placeholder{color:var(--muted);}
+
+.btn-hero-search{
+  padding:13px 28px;background:var(--accent);color:#000;
+  border:none;border-radius:10px;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all var(--t);white-space:nowrap;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.btn-hero-search:hover{background:#2de896;box-shadow:0 4px 20px rgba(79,255,176,.25);}
+
+/* ══ STATS ══ */
+.hero-stats{
+  display:flex;gap:48px;justify-content:center;
+  animation:fadeUp .7s ease .4s both;
+}
+.hstat .num{
+  font-family:'DM Mono',monospace;font-size:32px;font-weight:500;
+  color:var(--accent);
+}
+.hstat .lbl{font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* ══ FEATURES ══ */
+.features{
+  padding:100px 48px;
+  position:relative;z-index:1;
+  max-width:1200px;margin:0 auto;
+}
+.section-label{
+  text-align:center;
+  font-size:11px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--accent);
+  font-family:'DM Mono',monospace;margin-bottom:16px;
+}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:42px;font-weight:800;letter-spacing:-.5px;
+  text-align:center;margin-bottom:60px;
+}
+.section-title em{color:var(--accent);font-style:italic;}
+
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.feat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px;
+  transition:all var(--t);
+  position:relative;overflow:hidden;
+}
+.feat-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(79,255,176,.03),transparent);
+  opacity:0;transition:opacity var(--t);
+}
+.feat-card:hover{border-color:rgba(79,255,176,.2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.2);}
+.feat-card:hover::before{opacity:1;}
+.feat-icon{font-size:32px;margin-bottom:16px;}
+.feat-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;margin-bottom:8px;}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* ══ SOURCES ══ */
+.sources{
+  padding:80px 48px;
+  position:relative;z-index:1;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.sources-inner{max-width:1000px;margin:0 auto;}
+.sources-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px;}
+.src-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+  transition:all var(--t);
+}
+.src-card:hover{border-color:rgba(79,255,176,.2);}
+.src-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+.src-desc{font-size:11px;color:var(--muted);}
+.src-plan{
+  display:inline-block;margin-top:8px;
+  font-size:9px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;font-family:'DM Mono',monospace;
+  padding:2px 8px;border-radius:20px;
+}
+.sp-free{background:rgba(79,255,176,.08);color:var(--accent);border:1px solid rgba(79,255,176,.15);}
+.sp-scholar{background:rgba(123,97,255,.1);color:var(--accent2);border:1px solid rgba(123,97,255,.2);}
+.sp-elite{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.2);}
+
+/* ══ PLANS ══ */
+.plans{padding:100px 48px;position:relative;z-index:1;max-width:1100px;margin:0 auto;}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.plan-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:28px;
+  display:flex;flex-direction:column;gap:18px;
+  position:relative;overflow:hidden;transition:all var(--t);
+}
+.plan-card.feat-plan{border-color:rgba(123,97,255,.3);}
+.plan-card.elit-plan{border-color:rgba(245,200,66,.25);}
+.plan-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.2);}
+.pbadge{position:absolute;top:14px;right:14px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:20px;}
+.pbadge.pop{background:rgba(123,97,255,.12);color:var(--accent2);border:1px solid rgba(123,97,255,.2);}
+.pbadge.prem{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.2);}
+.plan-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;}
+.plan-price{display:flex;align-items:baseline;gap:4px;}
+.plan-amt{font-size:34px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);}
+.plan-amt.gold{color:var(--gold);}
+.plan-free-tag{font-size:28px;font-weight:800;font-family:'DM Mono',monospace;color:var(--muted);}
+.plan-per{font-size:12px;color:var(--muted);}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.plan-feats li{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);}
+.ck{font-size:13px;flex-shrink:0;margin-top:1px;}
+.ck.g{color:var(--accent);}
+.ck.gold{color:var(--gold);}
+.ck.dim{color:var(--muted);opacity:.3;}
+.plan-cta{
+  padding:13px;border-radius:10px;border:none;
+  font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all var(--t);text-decoration:none;
+  text-align:center;display:block;margin-top:auto;
+}
+.cta-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--muted);}
+.cta-ghost:hover{color:var(--text);}
+.cta-scholar{background:var(--accent2);color:#fff;}
+.cta-scholar:hover{background:#9480ff;transform:translateY(-1px);}
+.cta-elite{background:var(--gold);color:#000;}
+.cta-elite:hover{background:#f7d462;transform:translateY(-1px);}
+
+/* ══ CTA SECTION ══ */
+.cta-section{
+  padding:100px 48px;
+  position:relative;z-index:1;
+  text-align:center;
+}
+.cta-inner{
+  max-width:620px;margin:0 auto;
+  background:linear-gradient(135deg,rgba(79,255,176,.07),rgba(123,97,255,.07));
+  border:1px solid rgba(79,255,176,.15);
+  border-radius:24px;padding:56px 48px;
+}
+.cta-title{font-family:'Playfair Display',serif;font-size:40px;font-weight:800;line-height:1.1;margin-bottom:16px;}
+.cta-title em{color:var(--accent);font-style:italic;}
+.cta-sub{font-size:15px;color:var(--muted);margin-bottom:32px;line-height:1.7;}
+.cta-btns{display:flex;gap:12px;justify-content:center;}
+.btn-cta-main{
+  padding:15px 32px;background:var(--accent);color:#000;
+  border:none;border-radius:11px;
+  font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all var(--t);text-decoration:none;
+}
+.btn-cta-main:hover{background:#2de896;transform:translateY(-2px);box-shadow:0 6px 28px rgba(79,255,176,.3);}
+.btn-cta-ghost{
+  padding:15px 32px;background:transparent;
+  border:1px solid var(--border);border-radius:11px;
+  color:var(--muted);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;transition:all var(--t);text-decoration:none;
+}
+.btn-cta-ghost:hover{color:var(--text);border-color:var(--muted);}
+
+/* ══ FOOTER ══ */
+footer{
+  border-top:1px solid var(--border);
+  padding:28px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:1;
+}
+.footer-logo{font-family:'Playfair Display',serif;font-size:15px;color:var(--accent);}
+.footer-txt{font-size:12px;color:var(--muted);}
+
+/* ══ AUTH REDIRECT MODAL ══ */
+.modal-ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  z-index:999;display:none;align-items:center;justify-content:center;padding:24px;
+}
+.modal-ov.show{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:22px;padding:40px;max-width:440px;width:100%;
+  text-align:center;
+  animation:popIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.modal-ico{font-size:52px;margin-bottom:16px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;margin-bottom:10px;}
+.modal-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.7;}
+.modal-acts{display:flex;gap:10px;}
+.mbtn-register{
+  flex:1;padding:14px;background:var(--accent);color:#000;
+  border:none;border-radius:11px;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all var(--t);text-decoration:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.mbtn-register:hover{background:#2de896;}
+.mbtn-login{
+  padding:14px 20px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:11px;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all var(--t);text-decoration:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.mbtn-login:hover{border-color:var(--muted);}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;color:var(--muted);
+  transition:all var(--t);
+}
+.modal-close:hover{color:var(--text);}
+.modal{position:relative;}
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="nav-logo-icon">📄</div>
+    <div class="nav-logo-name">PDF Harvester</div>
+  </a>
+  <div class="nav-right">
+    <div class="nav-theme" onclick="toggleTheme()" id="theme-btn" title="Changer de thème">🌙</div>
+    <a class="btn-nav-ghost" href="/auth">Se connecter</a>
+    <a class="btn-nav-primary" href="/auth?tab=register">Commencer gratuitement</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">✦ Open Access · 100% Légal · 8 Sources</div>
+  <h1 class="hero-title">Le savoir,<br><em>librement</em> accessible.</h1>
+  <p class="hero-sub">Recherchez et téléchargez des milliers de PDFs académiques, livres du domaine public et documents officiels — tout en un seul endroit.</p>
+
+  <!-- Search qui redirige vers auth -->
+  <div class="hero-search">
+    <div class="hsbox">
+      <span class="hs-icon">⌕</span>
+      <input class="hsinput" id="hero-q" placeholder="machine learning, économie africaine, philosophie...">
+      <button class="btn-hero-search" onclick="heroSearch()">
+        <span>🔍</span> Rechercher
+      </button>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hstat"><div class="num">8</div><div class="lbl">Bases de données</div></div>
+    <div class="hstat"><div class="num">∞</div><div class="lbl">Documents indexés</div></div>
+    <div class="hstat"><div class="num">100%</div><div class="lbl">Légal & Gratuit</div></div>
+    <div class="hstat"><div class="num">7</div><div class="lbl">DL offerts</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="section-label">Pourquoi PDF Harvester</div>
+  <h2 class="section-title">Tout ce dont vous avez <em>besoin</em></h2>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🔍</div>
+      <div class="feat-title">Recherche unifiée</div>
+      <div class="feat-desc">Une seule requête interroge simultanément arXiv, PubMed, Gutenberg, CrossRef et 4 autres bases de données mondiales.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🎁</div>
+      <div class="feat-title">Parrainage & bonus</div>
+      <div class="feat-desc">Invitez des amis et gagnez +5 téléchargements par inscription. Atteignez des paliers pour des récompenses exclusives jusqu'au statut Légende.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌐</div>
+      <div class="feat-title">Scanner une URL</div>
+      <div class="feat-desc">Collez l'URL de n'importe quelle page web publique et détectez instantanément tous les PDFs disponibles au téléchargement.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌙</div>
+      <div class="feat-title">Mode sombre & clair</div>
+      <div class="feat-desc">Interface élégante adaptée à vos préférences visuelles. Passez d'un thème à l'autre en un clic depuis le tableau de bord.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Dashboard complet</div>
+      <div class="feat-desc">Suivez vos téléchargements, gérez votre profil, visualisez vos parrainages et upgradez votre plan depuis une interface unifiée.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔒</div>
+      <div class="feat-title">100% légal</div>
+      <div class="feat-desc">Exclusivement des contenus open access, domaine public et documents officiels. Aucune violation de droits d'auteur.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section class="sources">
+  <div class="sources-inner">
+    <div class="section-label">Nos sources</div>
+    <h2 class="section-title">8 bases de données <em>mondiales</em></h2>
+    <div class="sources-grid">
+      <div class="src-card">
+        <div class="src-name">arXiv</div>
+        <div class="src-desc">Sciences, maths, IA — 2M+ articles</div>
+        <span class="src-plan sp-free">Gratuit</span>
+      </div>
+      <div class="src-card">
+        <div class="src-name">Project Gutenberg</div>
+        <div class="src-desc">70 000+ livres domaine public</div>
+        <span class="src-plan sp-free">Gratuit</span>
+      </div>
+      <div class="src-card">
+        <div class="src-name">Open Library</div>
+        <div class="src-desc">Internet Archive — millions d'œuvres</div>
+        <span class="src-plan sp-free">Gratuit</span>
+      </div>
+      <div class="src-card">
+        <div class="src-name">PubMed Central</div>
+        <div class="src-desc">Articles médicaux open access</div>
+        <span class="src-plan sp-scholar">Scholar+</span>
+      </div>
+      <div class="src-card">
+        <div class="src-name">CrossRef</div>
+        <div class="src-desc">Publications académiques avec PDF</div>
+        <span class="src-plan sp-scholar">Scholar+</span>
+      </div>
+      <div class="src-card">
+        <div class="src-name">DOAJ</div>
+        <div class="src-desc">Journaux scientifiques open access</div>
+        <span class="src-plan sp-scholar">Scholar+</span>
+      </div>
+      <div class="src-card">
+        <div class="src-name">Data.gouv.fr</div>
+        <div class="src-desc">Documents gouvernementaux officiels</div>
+        <span class="src-plan sp-scholar">Scholar+</span>
+      </div>
+      <div class="src-card">
+        <div class="src-name">Semantic Scholar</div>
+        <div class="src-desc">Recherche sémantique par IA</div>
+        <span class="src-plan sp-elite">Élite</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="plans">
+  <div class="section-label">Tarifs</div>
+  <h2 class="section-title">Un plan pour chaque <em>besoin</em></h2>
+  <div class="plans-grid">
+    <div class="plan-card">
+      <div><div class="plan-name">Gratuit</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Pour démarrer</div></div>
+      <div class="plan-price"><span class="plan-free-tag">0€</span></div>
+      <ul class="plan-feats">
+        <li><span class="ck g">✓</span>7 téléchargements offerts</li>
+        <li><span class="ck g">✓</span>Bonus parrainage illimités</li>
+        <li><span class="ck g">✓</span>3 sources (arXiv, Gutenberg, Open Library)</li>
+        <li><span class="ck dim">✗</span>Sources académiques avancées</li>
+        <li><span class="ck dim">✗</span>Recherche étendue</li>
+      </ul>
+      <a class="plan-cta cta-ghost" href="/auth?tab=register">Commencer gratuitement</a>
+    </div>
+    <div class="plan-card feat-plan">
+      <span class="pbadge pop">Populaire</span>
+      <div><div class="plan-name">Scholar</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Pour les chercheurs</div></div>
+      <div class="plan-price"><span class="plan-amt">4.99€</span><span class="plan-per">/mois</span></div>
+      <ul class="plan-feats">
+        <li><span class="ck g">✓</span>100 téléchargements/mois</li>
+        <li><span class="ck g">✓</span>7 sources dont PubMed & CrossRef</li>
+        <li><span class="ck g">✓</span>50 résultats par recherche</li>
+        <li><span class="ck g">✓</span>Export CSV</li>
+        <li><span class="ck dim">✗</span>Recherche sémantique IA</li>
+      </ul>
+      <a class="plan-cta cta-scholar" href="/auth?tab=register">Choisir Scholar</a>
+    </div>
+    <div class="plan-card elit-plan">
+      <span class="pbadge prem">Élite</span>
+      <div><div class="plan-name">Élite</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Accès total</div></div>
+      <div class="plan-price"><span class="plan-amt gold">12.99€</span><span class="plan-per">/mois</span></div>
+      <ul class="plan-feats">
+        <li><span class="ck gold">✓</span>Téléchargements <strong>illimités</strong></li>
+        <li><span class="ck gold">✓</span>8 sources · Semantic Scholar IA</li>
+        <li><span class="ck gold">✓</span>200 résultats par recherche</li>
+        <li><span class="ck gold">✓</span>API personnelle incluse</li>
+        <li><span class="ck gold">✓</span>Support prioritaire 24/7</li>
+      </ul>
+      <a class="plan-cta cta-elite" href="/auth?tab=register">Choisir Élite</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2 class="cta-title">Prêt à <em>moissonner</em><br>le savoir ?</h2>
+    <p class="cta-sub">Rejoignez des milliers d'étudiants, chercheurs et curieux qui accèdent au savoir librement.</p>
+    <div class="cta-btns">
+      <a class="btn-cta-main" href="/auth?tab=register">Créer un compte gratuit</a>
+      <a class="btn-cta-ghost" href="/auth">Se connecter</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">📄 PDF Harvester</div>
+  <div class="footer-txt">Open Knowledge Platform · 100% Légal</div>
+  <div class="footer-txt" id="footer-year"></div>
+</footer>
+
+<!-- AUTH REDIRECT MODAL -->
+<div class="modal-ov" id="auth-modal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div class="modal-ico">🔐</div>
+    <div class="modal-title" id="modal-title">Connexion requise</div>
+    <div class="modal-sub" id="modal-sub">Pour rechercher et télécharger des PDFs, créez un compte gratuit ou connectez-vous.</div>
+    <div class="modal-acts">
+      <a class="mbtn-register" href="/auth?tab=register">S'inscrire gratuitement</a>
+      <a class="mbtn-login" href="/auth">Se connecter</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('footer-year').textContent = '© ' + new Date().getFullYear();
+
+/* ── Theme ── */
+let theme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+document.getElementById('theme-btn').textContent = theme === 'dark' ? '🌙' : '☀️';
+
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-btn').textContent = theme === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('theme', theme);
+}
+
+/* ── Hero search → redirect to auth ── */
+function heroSearch() {
+  const q = document.getElementById('hero-q').value.trim();
+  showAuthModal(q);
+}
+
+function showAuthModal(query) {
+  const modal = document.getElementById('auth-modal');
+  if (query) {
+    document.getElementById('modal-title').textContent = '🔍 Recherche : "' + query + '"';
+    document.getElementById('modal-sub').textContent = 'Connectez-vous ou créez un compte gratuit pour lancer cette recherche et accéder à des milliers de PDFs.';
+    // Pass query as param so dashboard can auto-search after login
+    document.querySelector('.mbtn-register').href = '/auth?tab=register&q=' + encodeURIComponent(query);
+    document.querySelector('.mbtn-login').href = '/auth?q=' + encodeURIComponent(query);
+  }
+  modal.classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('auth-modal').classList.remove('show');
+}
+
+// Enter on search input
+document.getElementById('hero-q').addEventListener('keydown', e => {
+  if (e.key === 'Enter') heroSearch();
+});
+
+// Close modal on overlay click
+document.getElementById('auth-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Check if user is already logged in → redirect to app
+fetch('/api/me').then(r => r.json()).then(data => {
+  if (data.user) {
+    // Already logged in, update nav
+    const nav = document.querySelector('.nav-right');
+    nav.innerHTML = `
+      <div class="nav-theme" onclick="toggleTheme()" id="theme-btn" title="Changer de thème">${theme === 'dark' ? '🌙' : '☀️'}</div>
+      <a class="btn-nav-primary" href="/app">Mon dashboard →</a>
+    `;
+  }
+}).catch(() => {});
+</script>
+</body>
+</html>
